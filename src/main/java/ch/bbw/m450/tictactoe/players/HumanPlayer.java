@@ -11,10 +11,13 @@ import ch.bbw.m450.tictactoe.TicTacToePlayer;
  */
 public class HumanPlayer implements TicTacToePlayer {
 
+	// a single scanner, as each new scanner would swallow buffered input of the previous one
+	private final Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
+
 	@Override
+	@SuppressWarnings("java:S106") // console game: printing to stdout is intended
 	public int play(Stone[] board, Stone colorToPlay) {
-		System.out.println(TicTacToeMain.toString(board) + "where to to put the next " + colorToPlay + "? (0-8): ");
-		var scanner = new Scanner(System.in, StandardCharsets.UTF_8);
+		System.out.println(TicTacToeMain.toString(board) + "where to put the next " + colorToPlay + "? (0-8): ");
 		return Integer.parseInt(scanner.nextLine());
 	}
 }

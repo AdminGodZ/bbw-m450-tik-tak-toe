@@ -13,6 +13,13 @@ public class TicTacToeMain {
 
 	public static final int BOARD_SIZE = 9;
 
+	private static final int[][] LINES = { { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, // rows
+			{ 0, 3, 6 }, { 1, 4, 7 }, { 2, 5, 8 }, // columns
+			{ 0, 4, 8 }, { 2, 4, 6 } }; // diagonals
+
+	private TicTacToeMain() {
+	}
+
 	public static void main(String[] args) {
 		play(new HumanPlayer(), new GreedyPlayer());
 	}
@@ -23,16 +30,8 @@ public class TicTacToeMain {
 	 * @return true if the colorToPlay wins the current board (has three in a line)
 	 */
 	public static boolean isWin(Stone[] b, Stone color) {
-		// @formatter:off
-		return  b[0] == color && b[0] == b[1] && b[1] == b[2] ||
-				b[3] == color && b[3] == b[4] && b[4] == b[5] ||
-				b[6] == color && b[6] == b[7] && b[7] == b[8] ||
-				b[0] == color && b[0] == b[3] && b[3] == b[6] ||
-				b[1] == color && b[1] == b[4] && b[4] == b[7] ||
-				b[2] == color && b[2] == b[5] && b[5] == b[8] ||
-				b[0] == color && b[0] == b[4] && b[4] == b[8] ||
-				b[2] == color && b[2] == b[4] && b[4] == b[6];
-		// @formatter:on
+		return Arrays.stream(LINES)
+				.anyMatch(line -> Arrays.stream(line).allMatch(i -> b[i] == color));
 	}
 
 	public static String toString(Stone[] board) {
@@ -40,7 +39,7 @@ public class TicTacToeMain {
 		for (var i = 0; i < 3; i++) {
 			for (var j = 0; j < 3; j++) {
 				var index = i * 3 + j;
-				String color = board[index] == Stone.CROSS ? "X" : "O";
+				var color = board[index] == Stone.CROSS ? "X" : "O";
 				color = "\033[1m" + color + "\033[0m";
 				color = board[index] == null ? "\033[37m" + index + "\033[0m" : color;
 				sb.append(color)
@@ -58,6 +57,7 @@ public class TicTacToeMain {
 	 * @param oPlayer the 2nd player. Must not be the same as xPlayer
 	 * @return the winning Color or `null` on draw
 	 */
+	@SuppressWarnings("java:S106") // console game: printing to stdout is intended
 	public static Stone play(TicTacToePlayer xPlayer, TicTacToePlayer oPlayer) {
 		// the board is organized as a 1-dimensional matrix of size 3x3=9
 		// to get the index for position at row r and colum c, calculate index=r*3+c
@@ -66,7 +66,7 @@ public class TicTacToeMain {
 		//     3 | 4 | 5
 		//    ---+---+---
 		//     6 | 7 | 8
-		if(xPlayer == oPlayer) {
+		if (xPlayer == oPlayer) {
 			throw new IllegalArgumentException("players must differ");
 		}
 		var board = new Stone[BOARD_SIZE]; // all null -> empty
@@ -76,7 +76,7 @@ public class TicTacToeMain {
 			// we copy to avoid side effects by the player (not needed if they behave)
 			var clone = Arrays.copyOf(board, board.length);
 			var playTo = currentPlayer.play(clone, currentColor);
-			if (playTo < 0 || playTo >= 9 || board[playTo] != null) {
+			if (playTo < 0 || playTo >= BOARD_SIZE || board[playTo] != null) {
 				System.out.println(toString(board));
 				throw new IllegalStateException("cannot play to position " + playTo);
 			}

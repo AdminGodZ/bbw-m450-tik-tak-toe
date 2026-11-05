@@ -9,23 +9,27 @@ application {
 	mainClass = 'ch.bbw.m450.tictactoe.TicTacToeMain'
 }
 
+repositories {
+	mavenCentral()
+}
+
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.1'
-    testImplementation 'org.assertj:assertj-core:3.27.7'
+	testImplementation platform('org.junit:junit-bom:6.1.3')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.assertj:assertj-core:3.27.7'
+	testImplementation 'org.junit-pioneer:junit-pioneer:2.3.0'
+	testImplementation 'com.tngtech.archunit:archunit:1.5.1'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 sourceSets {
-    test {
-        java.srcDir 'src/tests/java'
-    }
+	test {
+		java.srcDir 'src/tests/java'
+	}
 }
 
 run {
 	standardInput = System.in
-}
-
-repositories {
-	mavenCentral()
 }
 
 test {
@@ -33,11 +37,36 @@ test {
 	finalizedBy jacocoTestReport
 }
 
-jacocoTestReport {
-    dependsOn test
+jacoco {
+	toolVersion = '0.8.16'
 }
 
-jacoco {
-    toolVersion = "0.8.14"
-    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+	}
 }
+
+jacocoTestCoverageVerification {
+	dependsOn test
+	violationRules {
+		rule {
+			limit {
+				counter = 'BRANCH'
+				minimum = 0.9
+			}
+		}
+	}
+}
+
+pitest {
+	pitestVersion = '1.30.2'
+	junit5PluginVersion = '1.2.3'
+	targetClasses = ['ch.bbw.m450.tictactoe.*']
+	outputFormats = ['HTML', 'XML']
+	timestampedReports = false
+}
+
+check.dependsOn jacocoTestCoverageVerification, 'pitest'
